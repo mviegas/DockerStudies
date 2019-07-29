@@ -1,0 +1,41 @@
+version: '3'
+
+services:
+  elastic:
+    container_name: "elastic"
+    image: docker.elastic.co/elasticsearch/elasticsearch:6.6.1
+    environment:
+      discovery.type: "single-node"
+      xpack.security.enabled: "true"
+      http.host: "0.0.0.0"
+      -e "ELASTICSEARCH_USERNAME=elastic" \
+      -e "ELASTICSEARCH_PASSWD=tst123!@#” \
+      -e XPACK_GRAPH_ENABLED=true \
+      -e XPACK_WATCHER_ENABLED=true \
+      -e XPACK_ML_ENABLED=true \
+      -e XPACK_MONITORING_ENABLED=true \
+      -e XPACK_MONITORING_UI_CONTAINER_ELASTICSEARCH_ENABLED \
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    restart: "always"
+    networks:
+      - elastic-net
+  
+  kibana:
+    container_name: "kibana"
+    image:
+      docker.elastic.co/kibana/kibana:6.6.1
+    environment: 
+      ELASTICSEARCH_URL: "http://elastic:9200"
+      XPACK_SECURITY_ENABLED: "true"
+    ports:
+      - "5601:5601"
+    networks:
+      - elastic-net
+    depends_on:
+      - elastic
+
+networks: 
+  elastic-net:
+    driver: bridge
